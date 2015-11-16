@@ -211,9 +211,9 @@ exit(void)
   struct proc *p;
   int fd;
 
-  if(proc == initproc)
+  if(proc == initproc){
     panic("init exiting");
-    if(proc->numThreads == 0)){
+    if(proc->numThreads == 0){
       // Close all open files.
       for(fd = 0; fd < NOFILE; fd++){
         if(proc->ofile[fd]){
@@ -312,7 +312,7 @@ join(void ** stack)
         if(p->state == ZOMBIE){
           // Found one.
           pid = p->pid;
-          stack = p->tstack;
+          stack = (void **)p->tstack;
           p->state = UNUSED;
           p->pid = 0;
           p->parent = 0;

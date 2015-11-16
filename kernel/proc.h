@@ -76,6 +76,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   uint tstack;                 // points at base of thread stack
   int isthread;                // is the process a thread?
+  int numThreads;              // number of children threads
 };
 
 // Process memory is laid out contiguously, low addresses first:

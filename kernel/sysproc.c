@@ -14,9 +14,9 @@ sys_clone(void)
   void *arg;
   void *stack;
 
-  argptr(0, (void*) &fcn, sizeof((void*)) < 0) return -1;
-  argptr(1, (void*) &arg, sizeof((void*)) < 0 ) return -1;
-  argptr(2, (void*) &stack, sizeof((void*)) < 0) return -1;
+  if(argptr(0, (void*) &fcn, sizeof(void*)) < 0) return -1;
+  if(argptr(1, (void*) &arg, sizeof(void*)) < 0 ) return -1;
+  if(argptr(2, (void*) &stack, sizeof(void*)) < 0) return -1;
 
   return clone(fcn, arg, stack);
 }
@@ -24,6 +24,9 @@ sys_clone(void)
 int
 sys_join(void){
 
+  void ** stack;
+  if(argptr(0, (char**) &stack, sizeof(void**)) < 0) return -1;
+  return join(stack);
 }
 
 int
