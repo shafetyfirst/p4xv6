@@ -16,7 +16,7 @@ printf(int fd, char *s, ...)
 void
 clonetest(void)
 {
-
+  clone(
 }
 
 int

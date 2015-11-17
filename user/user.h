@@ -2,7 +2,7 @@
 #define _USER_H_
 
 struct stat;
-
+struct lock_t;
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -27,6 +27,7 @@ int sleep(int);
 int uptime(void);
 int clone(void(*) (void*), void *, void*);
 int join(void**);
+
 // user library functions (ulib.c)
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);
@@ -40,6 +41,14 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+// thread library functions (tlib.c)
+int thread_join(void);
+int thread_create(void (*start_routine)(void*), void *arg);
+void lock_init(struct lock_t *lk, char *name);
+void lock_acquire(struct lock_t *lk);
+void lock_release(struct lock_t *lk);
+
 
 #endif // _USER_H_
 

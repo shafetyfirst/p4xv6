@@ -165,6 +165,14 @@ clone(void(*fcn) (void*), void *arg, void*stack)
   int i, pid;
   uint sp, ustack[2];
   struct proc *np;
+  
+  if((uint)stack % PGSIZE != 0 || stack < 0){
+    return -1;
+  }
+
+  if(proc->sz - (uint)stack == PGSIZE/2){
+    return -1;
+  }
 
   // Allocate process.
   if((np = allocproc()) == 0)
@@ -173,7 +181,7 @@ clone(void(*fcn) (void*), void *arg, void*stack)
   // Copy process state from p.
   np->pgdir = proc->pgdir;
 
-
+  proc->numThreads++;
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
@@ -188,14 +196,15 @@ clone(void(*fcn) (void*), void *arg, void*stack)
       np->ofile[i] = filedup(proc->ofile[i]);
   np->cwd = idup(proc->cwd);
   
-  sp = (uint) stack + PGSIZE - 8;
+  sp = np->tf->esp + PGSIZE - 8;
   ustack[0] = 0xffffffff;
-  ustack[1] = (uint) arg;
+  ustack[1] = (uint)arg;
 
   if(copyout(np->pgdir, sp, ustack, 8) < 0)
     return -1;
 
   pid = np->pid;
+  np->tf->esp = sp;
   np->state = RUNNABLE;
   safestrcpy(np->name, proc->name, sizeof(proc->name));
   return pid;
@@ -211,7 +220,7 @@ exit(void)
   struct proc *p;
   int fd;
 
-  if(proc == initproc)
+  if(proc == initproc){
     panic("init exiting");
     if(proc->numThreads == 0){
       // Close all open files.
@@ -262,7 +271,7 @@ wait(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->parent != proc)
         continue;
-      if(p->pgdir != proc->pgdir){
+      if(p->pgdir != proc->pgdir  && !p->isthread){
         havekids = 1;
       
         if(p->state == ZOMBIE && proc->numThreads == 0){
@@ -300,6 +309,8 @@ join(void ** stack)
   struct proc *p;
   int havekids, pid;
 
+
+
   acquire(&ptable.lock);
   for(;;){
     // Scan through table looking for zombie children.
@@ -307,12 +318,13 @@ join(void ** stack)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->parent != proc)
         continue;
-      if(p->pgdir == proc->pgdir){
+      if(p->pgdir == proc->pgdir && p->isthread){
         havekids = 1;
         if(p->state == ZOMBIE){
           // Found one.
           pid = p->pid;
-          stack = (void **)p->tstack;
+          stack = (void **) &p->tstack;
+          cprintf("zombie1: %p, %p\n", *stack, p->tstack);
           p->state = UNUSED;
           p->pid = 0;
           p->parent = 0;
@@ -320,6 +332,7 @@ join(void ** stack)
           p->killed = 0;
           proc->numThreads--;
           release(&ptable.lock);
+          cprintf("zombie2: %p\n", stack);
           return pid;
         }
       }
@@ -533,5 +546,38 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+static void thread_create(void (*start_routine)(void*), void *arg)
+{
+  void *stack = kalloc();
+
+   if(stack != NULL){
+     panic("thread create error");
+   }
+  if((uint)stack % PGSIZE)
+    stack = stack + (4096 - (uint)stack % PGSIZE);
+
+  clone(start_routine, &arg, stack);
+
+  return;
+}
+
+static void thread_join(void){
+
+void *stack = kalloc();
+   if(stack != NULL){
+     panic("join error");
+   }
+   if((uint)stack % PGSIZE)
+     stack = stack + (4096 - (uint)stack % PGSIZE);
+
+  join(&stack);
+  
+  kfree(stack);
+  
+  return;
+  
+}
+
 
 

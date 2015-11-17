@@ -4,6 +4,9 @@
 #include "user.h"
 #include "x86.h"
 
+
+#define PGSIZE (4096)
+
 char*
 strcpy(char *s, char *t)
 {
@@ -103,3 +106,6 @@ memmove(void *vdst, void *vsrc, int n)
     *dst++ = *src++;
   return vdst;
 }
+
+
+
