@@ -41,7 +41,7 @@ main(int argc, char *argv[])
    assert(join_pid == clone_pid);
 //   printf(1, "%p\n", stack);
 //   printf(1, "%p\n", join_stack);
-   assert(stack == &join_stack);
+   assert(stack == join_stack);
    assert(global == 2);
 
    printf(1, "TEST PASSED\n");
