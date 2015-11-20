@@ -45,9 +45,9 @@ int atoi(const char*);
 // thread library functions (tlib.c)
 int thread_join(void);
 int thread_create(void (*start_routine)(void*), void *arg);
-void lock_init(struct lock_t *lk, char *name);
-void lock_acquire(struct lock_t *lk);
-void lock_release(struct lock_t *lk);
+void lock_init(lock_t *lk);
+void lock_acquire(lock_t *lk);
+void lock_release(lock_t *lk);
 
 
 #endif // _USER_H_

@@ -107,34 +107,5 @@ memmove(void *vdst, void *vsrc, int n)
   return vdst;
 }
 
-void thread_create(void (*start_routine)(void*), void *arg)
-{
-  void *stack = malloc(PGSIZE);
 
-   if(stack != NULL){
-     printf(1, "thread create error");
-   }
-  if((uint)stack % PGSIZE)
-    stack = stack + (4096 - (uint)stack % PGSIZE);
 
-  clone(start_routine, &arg, stack);
-
-  return;
-}
-
-void thread_join(void)
-{
-  void *stack = malloc(PGSIZE);
-  if(stack != NULL){
-     printf(1, "join error");
-  }
-  if((uint)stack % PGSIZE)
-    stack = stack + (4096 - (uint)stack % PGSIZE);
-
-  join(&stack);
-  
-  free(stack);
-  
-  return;
-  
-}

@@ -323,9 +323,7 @@ join(void ** stack)
         if(p->state == ZOMBIE){
           // Found one.
           pid = p->pid;
-          cprintf("zombie1: %p, %p\n", stack, p->tstack);
           * stack = (void **) p->tstack;
-          cprintf("zombie2: %p, %p\n", stack, p->tstack);
           p->state = UNUSED;
           p->pid = 0;
           p->parent = 0;
@@ -333,7 +331,6 @@ join(void ** stack)
           p->killed = 0;
           proc->numThreads--;
           release(&ptable.lock);
-          cprintf("zombie3: %p\n", stack);
           return pid;
         }
       }

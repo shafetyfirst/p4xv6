@@ -6,6 +6,10 @@ USER_PROGS := \
   badclonetest\
   jointest\
   threadcreatetest\
+	locktest\
+	sizetest\
+	thread2test\
+	multitest\
 	echo\
 	forktest\
 	grep\

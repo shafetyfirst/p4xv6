@@ -2,7 +2,7 @@
 #define _USER_H_
 
 struct stat;
-struct sweetLock;
+struct lock_t;
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -45,9 +45,9 @@ int atoi(const char*);
 // thread library functions (tlib.c)
 int thread_join(void);
 int thread_create(void (*start_routine)(void*), void *arg);
-void lock_init(struct sweetLock *lk, char *name);
-void lock_acquire(struct sweetLock *lk);
-void lock_release(struct sweetLock *lk);
+void lock_init(struct lock_t *lk, char *name);
+void lock_acquire(struct lock_t *lk);
+void lock_release(struct lock_t *lk);
 
 
 #endif // _USER_H_

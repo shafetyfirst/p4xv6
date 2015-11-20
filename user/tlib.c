@@ -5,7 +5,7 @@
 #include "x86.h"
 
 #define PGSIZE (4096)
-struct lock_t {
+/*struct lock_t {
   uint locked;       // Is the lock held?
 
   // For debugging:
@@ -14,6 +14,7 @@ struct lock_t {
   uint pcs[10];      // The call stack (an array of program counters)
                      // that locked the lock.
 };
+*/
 
 int
 thread_create(void (*start_routine)(void*), void *arg)
@@ -36,7 +37,7 @@ thread_create(void (*start_routine)(void*), void *arg)
 int
 thread_join(void)
 {
-  void *stack = malloc(PGSIZE);
+  void *stack;
   int pid;  
   if(stack == NULL){
      printf(1, "join error");
@@ -53,11 +54,11 @@ thread_join(void)
 }
 
 void
-lock_init(struct lock_t *lk, char *name)
+lock_init(lock_t *lk)
 {
-  lk->name = name;
-  lk->locked = 0;
-//  lk->cpu = 0;
+  
+  lk = 0;
+
 }
 
 // Acquire the lock.
@@ -65,34 +66,26 @@ lock_init(struct lock_t *lk, char *name)
 // Holding a lock for a long time may cause
 // other CPUs to waste time spinning to acquire it.
 void
-lock_acquire(struct lock_t *lk)
+lock_acquire(lock_t *lk)
 {
- // pushcli(); // disable interrupts to avoid deadlock.
-/*
-  if(holding(lk))
-    panic("acquire");
-*/
+ 
   // The xchg is atomic.
   // It also serializes, so that reads after acquire are not
   // reordered before it. 
-  while(xchg(&lk->locked, 1) != 0)
-    ;
+  while(xchg(lk, 1) != 0);
 
-  // Record info about lock acquisition for debugging.
-//  lk->cpu = cpu;
-// getcallerpcs(&lk, lk->pcs);
 }
 
 // Release the lock.
 void
-lock_release(struct lock_t *lk)
+lock_release(lock_t *lk)
 {
-/*
-  if(!holding(lk))
-    panic("release");
-*/
-  lk->pcs[0] = 0;
-//  lk->cpu = 0;
+
+  if(lk == 0){
+	printf(1, "lock error!\n");
+	exit();
+  }
+
 
   // The xchg serializes, so that reads before release are 
   // not reordered after it.  The 1996 PentiumPro manual (Volume 3,
@@ -103,7 +96,7 @@ lock_release(struct lock_t *lk)
   // after a store. So lock->locked = 0 would work here.
   // The xchg being asm volatile ensures gcc emits it after
   // the above assignments (and after the critical section).
-  xchg(&lk->locked, 0);
+  xchg(lk, 0);
 
  // popcli();
 }
